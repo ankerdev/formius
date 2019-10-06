@@ -12,6 +12,7 @@
     "member-ordering": false,
     "no-console": false,
     "no-empty": false,
+    "no-empty-interface": false,
     "no-increment-decrement": false,
     "no-return-await": false,
     "no-shadowed-variable": false,

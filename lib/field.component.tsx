@@ -1,29 +1,48 @@
 import * as React from 'react';
+import { IField, IFieldProps, ITextFieldProps } from './form.declarations';
+import { useField } from './use-field.hook';
 
-interface IField<T = string> {
-  defaultValue?: T;
-  hasFocus: boolean;
-  label?: string;
-  name: string;
-  touched: boolean;
-  value: T;
-  validationRules?: any; // @TODO
+// @TODO Move to declarations
+interface IFieldContainerProps {
+  field: IField;
+  props: IFieldProps;
 }
 
-interface ITextField extends IField<string> {
-  disabled: boolean;
-  placeholder?: string;
-  readOnly?: boolean;
-}
+const FieldContainer = ({ children, field, props }: React.PropsWithChildren<IFieldContainerProps>) => {
+  // @TODO Inject global classNames if applied
+  return (
+    <fieldset>
+      <label>
+        {props.label && (
+          <div>
+            {props.label}
+          </div>
+        )}
+        {children}
+        {field.touched && field.errors.length > 0 && (
+          <div>
+            {field.errors.map(error => <div key={error}>{error}</div>)}
+          </div>
+        )}
+      </label>
+    </fieldset>
+  );
+};
 
-interface ICheckboxField extends IField<boolean> {
-  options: string[];
-}
+// @TODO `props` is not a very descriptive name, fix
+export const Text = (props: ITextFieldProps) => {
+  const field = useField(props);
 
-type Field = ICheckboxField | ITextField;
-
-export const useField = (field: ITextField) => {
-  const [hasFocus, setHasFocus] = React.useState<boolean>(false);
-  const [touched, setTouched] = React.useState<boolean>(false);
-  const [value, setValue] = React.useState(field.value); // @TODO How can I enforce type here?
+  return (
+    <FieldContainer field={field} props={props}>
+      <input
+        onBlur={field.onBlur}
+        onChange={({ target: { value } }) => field.onChange(value)}
+        onFocus={field.onFocus}
+        placeholder={props.placeholder}
+        type={props.type}
+        value={field.value}
+      />
+    </FieldContainer>
+  );
 };
