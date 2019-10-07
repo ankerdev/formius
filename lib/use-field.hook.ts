@@ -1,27 +1,43 @@
 import * as React from 'react';
 import { FormContext } from './form.context';
-import { IField, IFieldProps } from './form.declarations';
-import { useValidation } from './use-validation.hook';
+import { IField, IFieldProps, IValidationParameters } from './form.declarations';
+import { validate } from './form.utils';
 
 export const useField = (props: IFieldProps): IField => {
+  const [errors, setErrors] = React.useState<string[]>([]);
   const [hasFocus, setHasFocus] = React.useState<boolean>(false);
   const [touched, setTouched] = React.useState<boolean>(false);
   const [value, setValue] = React.useState(props.defaultValue || '');
-  const [valid, errors] = useValidation(value, touched, props.validationRules);
+
   const context = React.useContext(FormContext);
 
+  const { name, validationRules, validationSchema } = props;
+  const validationParameters: IValidationParameters = {
+    validationRules,
+    validationSchema,
+    value,
+  };
+
+  const validateField = async (): Promise<void> => {
+    const validationErrors = await validate(validationParameters);
+    setErrors(validationErrors);
+  };
+
   React.useEffect(() => {
-    context.setValue(props.name, {
-      valid,
-      value,
-    });
-  }, [valid, value]);
+    context.setField(name, validationParameters);
+  }, [value]);
 
   React.useEffect(() => {
     if (context.submitted && !touched) {
       setTouched(true);
     }
   }, [context.submitted]);
+
+  React.useEffect(() => {
+    if (touched) {
+      validateField();
+    }
+  }, [touched, value]);
 
   const onBlur = (): void => {
     setHasFocus(false);
@@ -46,7 +62,6 @@ export const useField = (props: IFieldProps): IField => {
     setTouched,
     setValue,
     touched,
-    valid,
     value,
   };
 };
