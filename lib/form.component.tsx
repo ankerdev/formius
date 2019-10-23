@@ -12,11 +12,16 @@ export const Form = ({ children, onSubmit }: IFormProps) => {
     setSubmissionCount(submissionCount + 1);
     const isValid = await validateFields();
     if (isValid) {
-      onSubmit(iterableFields().map(({ value }) => value));
+      onSubmit(
+        Object
+          .keys(fields.current)
+          .reduce((object, key) => ({
+            ...object,
+            [key]: fields.current[key].value,
+          }), {}),
+      );
     }
   };
-
-  const iterableFields = () => Object.values(fields.current);
 
   const setField = (key: string, value: IFormFieldValue): void => {
     fields.current = {
@@ -28,7 +33,9 @@ export const Form = ({ children, onSubmit }: IFormProps) => {
   const validateFields = async (): Promise<boolean> => {
     return (
       await Promise.all(
-        iterableFields().map(args => validate(args)),
+        Object
+          .values(fields.current)
+          .map(args => validate(args)),
       )
     ).every(errors => errors.length === 0);
   };
