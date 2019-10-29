@@ -19,7 +19,10 @@ export const useField = (props: IFieldProps): IField => {
   };
 
   const validateField = async (): Promise<void> => {
-    const validationErrors = await validate(validationArgs);
+    const validationErrors = await validate({
+      ...validationArgs,
+      fields: context.getFields(),
+    });
     setErrors(validationErrors);
   };
 

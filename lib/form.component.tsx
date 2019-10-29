@@ -4,7 +4,7 @@ import { IFormField, IFormFieldsObject, IFormProps } from './form.declarations';
 import { cx, throttle, validate } from './form.utils';
 import { formius } from './formius.class';
 
-export const Form = ({ className, children, onSubmit, onValueChange }: IFormProps) => {
+export function Form<T>({ className, children, onSubmit, onValueChange }: IFormProps<T>): JSX.Element {
   const [submissionCount, setSubmissionCount] = React.useState<number>(0);
   const fields = React.useRef<IFormFieldsObject>({});
 
@@ -26,7 +26,7 @@ export const Form = ({ className, children, onSubmit, onValueChange }: IFormProp
       ...fields.current,
       [key]: value,
     };
-    throttle(1, reporter);
+    throttle(reporter, 1);
   };
 
   const validateFields = async (): Promise<boolean> => {
@@ -34,17 +34,20 @@ export const Form = ({ className, children, onSubmit, onValueChange }: IFormProp
       await Promise.all(
         Object
           .values(fields.current)
-          .map(args => validate(args)),
+          .map(args => validate({
+            ...args,
+            fields: fields.current,
+          })),
       )
     ).every(errors => errors.length === 0);
   };
 
-  const values = (): {} => Object
+  const values = (): T => Object
     .keys(fields.current)
     .reduce((object, key) => ({
       ...object,
       [key]: fields.current[key].value,
-    }), {});
+    }), {}) as T;
 
   return (
     <form
@@ -53,10 +56,11 @@ export const Form = ({ className, children, onSubmit, onValueChange }: IFormProp
     >
       <FormContext.Provider value={{
         setField,
+        getFields: () => fields.current,
         submitted: submissionCount > 0,
       }}>
         {children}
       </FormContext.Provider>
     </form>
   );
-};
+}

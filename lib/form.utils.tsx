@@ -1,5 +1,5 @@
 import { ValidationError } from 'yup';
-import { IValidationArgs } from './form.declarations';
+import { IValidationArgs, IWithFields } from './form.declarations';
 
 export const cx = (...args: Array<string | null | undefined | { [key: string]: any }>): string => {
   return (args.filter(arg => !!arg) as Array<string | { [key: string]: any }>)
@@ -27,16 +27,17 @@ export const cx = (...args: Array<string | null | undefined | { [key: string]: a
     .trim();
 };
 
-export const throttle = (ms: number, callback: (() => void) & { _timeoutId?: number }): void => {
+export const throttle = (callback: (() => void) & { _timeoutId?: number }, ms: number): void => {
   window.clearTimeout(callback._timeoutId);
   callback._timeoutId = window.setTimeout(callback, ms);
 };
 
 export const validate = async ({
+  fields,
   validationRules,
   validationSchema,
   value,
-}: IValidationArgs): Promise<string[]> => {
+}: IValidationArgs & IWithFields): Promise<string[]> => {
   let validationErrors: string[] = [];
 
   if (validationSchema) {
@@ -53,7 +54,7 @@ export const validate = async ({
 
   if (validationRules) {
     for (const rule of validationRules) {
-      const errorMessage = await Promise.resolve(rule(value));
+      const errorMessage = await Promise.resolve(rule({ fields, value }));
       if (errorMessage) {
         validationErrors.push(errorMessage);
       }

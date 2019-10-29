@@ -5,6 +5,7 @@ import { Schema } from 'yup';
 // @TODO Should I follow React's interface for defaultValue?:
 // React.InputHTMLAttributes<HTMLInputElement>.value?: string | number | string[] | undefined
 
+/** Interfaces */
 export interface ICheckboxField extends IFieldProps {
   content: React.ReactNode;
 }
@@ -55,6 +56,7 @@ export interface IFieldWithOptionsProps extends IFieldProps {
 }
 
 export interface IFormContext {
+  getFields: () => IFormFieldsObject;
   setField: (key: string, value: IFormField) => void;
   submitted: boolean;
 }
@@ -66,10 +68,10 @@ export interface IFormFieldsObject {
 }
 
 // @TODO Add prop to disable globalClassNames per field?
-export interface IFormProps extends IWithClassName {
+export interface IFormProps<T> extends IWithClassName {
   children?: React.ReactNode;
-  onSubmit: ((values: any) => void | Promise<void>);
-  onValueChange?: ((values: any) => void | Promise<void>);
+  onSubmit: (values: T) => void | Promise<void>;
+  onValueChange?: (values: T) => void | Promise<void>;
 }
 
 export interface IGlobalClassNames extends IFieldClassNames {
@@ -115,4 +117,5 @@ export interface IWithValue {
   value: any;
 }
 
+/** Types */
 export type ValidationRule = (args: IValidationRuleArgs) => string | null | undefined | Promise<string | null | undefined>;
