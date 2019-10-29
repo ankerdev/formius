@@ -1,33 +1,32 @@
 import * as React from 'react';
 import { FormContext } from './form.context';
-import { IFormFieldValue, IFormFieldValuesObject, IFormProps } from './form.declarations';
-import { validate } from './form.utils';
+import { IFormField, IFormFieldsObject, IFormProps } from './form.declarations';
+import { cx, throttle, validate } from './form.utils';
+import { formius } from './formius.class';
 
-export const Form = ({ children, onSubmit }: IFormProps) => {
+export const Form = ({ className, children, onSubmit, onValueChange }: IFormProps) => {
   const [submissionCount, setSubmissionCount] = React.useState<number>(0);
-  const fields = React.useRef<IFormFieldValuesObject>({});
+  const fields = React.useRef<IFormFieldsObject>({});
 
-  const internalOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const reporter = (): void => {
+    onValueChange && onValueChange(values());
+  };
+
+  const internalOnSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setSubmissionCount(submissionCount + 1);
     const isValid = await validateFields();
     if (isValid) {
-      onSubmit(
-        Object
-          .keys(fields.current)
-          .reduce((object, key) => ({
-            ...object,
-            [key]: fields.current[key].value,
-          }), {}),
-      );
+      onSubmit(values());
     }
   };
 
-  const setField = (key: string, value: IFormFieldValue): void => {
+  const setField = (key: string, value: IFormField): void => {
     fields.current = {
       ...fields.current,
       [key]: value,
     };
+    throttle(1, reporter);
   };
 
   const validateFields = async (): Promise<boolean> => {
@@ -40,8 +39,18 @@ export const Form = ({ children, onSubmit }: IFormProps) => {
     ).every(errors => errors.length === 0);
   };
 
+  const values = (): {} => Object
+    .keys(fields.current)
+    .reduce((object, key) => ({
+      ...object,
+      [key]: fields.current[key].value,
+    }), {});
+
   return (
-    <form onSubmit={internalOnSubmit}>
+    <form
+      className={cx(formius.config.classNames.formClassName, className)}
+      onSubmit={internalOnSubmit}
+    >
       <FormContext.Provider value={{
         setField,
         submitted: submissionCount > 0,

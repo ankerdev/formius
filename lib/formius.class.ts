@@ -1,10 +1,12 @@
-import { IGlobalClassNames } from './form.declarations';
+import { IConfig } from './form.declarations';
 
-// @TODO
+// @TODO Add more stuff to this
 class Formius {
-  config: IGlobalClassNames = {};
+  config: IConfig = {
+    classNames: {},
+  };
 
-  configure(config: IGlobalClassNames): void {
+  configure(config: IConfig): void {
     this.config = config;
   }
 }

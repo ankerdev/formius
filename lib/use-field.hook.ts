@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FormContext } from './form.context';
-import { IField, IFieldProps, IValidationParameters } from './form.declarations';
+import { IField, IFieldProps, IValidationArgs } from './form.declarations';
 import { validate } from './form.utils';
 
 export const useField = (props: IFieldProps): IField => {
@@ -12,19 +12,19 @@ export const useField = (props: IFieldProps): IField => {
   const context = React.useContext(FormContext);
 
   const { name, validationRules, validationSchema } = props;
-  const validationParameters: IValidationParameters = {
+  const validationArgs: IValidationArgs = {
     validationRules,
     validationSchema,
     value,
   };
 
   const validateField = async (): Promise<void> => {
-    const validationErrors = await validate(validationParameters);
+    const validationErrors = await validate(validationArgs);
     setErrors(validationErrors);
   };
 
   React.useEffect(() => {
-    context.setField(name, validationParameters);
+    context.setField(name, validationArgs);
   }, [value]);
 
   React.useEffect(() => {

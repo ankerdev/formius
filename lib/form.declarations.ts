@@ -5,9 +5,13 @@ import { Schema } from 'yup';
 // @TODO Should I follow React's interface for defaultValue?:
 // React.InputHTMLAttributes<HTMLInputElement>.value?: string | number | string[] | undefined
 
-// @TODO Add prop to disable globalClassNames per field?
 export interface ICheckboxField extends IFieldProps {
   content: React.ReactNode;
+}
+
+// @TODO Extend this
+export interface IConfig {
+  classNames: IGlobalClassNames;
 }
 
 export interface IField extends IWithValue {
@@ -31,7 +35,7 @@ export interface IFieldClassNames {
   labelClassName?: string;
 }
 
-export interface IFieldContainerProps {
+export interface IFieldContainerProps extends IWithClassName {
   field: IField;
   props: IFieldProps;
 }
@@ -51,23 +55,30 @@ export interface IFieldWithOptionsProps extends IFieldProps {
 }
 
 export interface IFormContext {
-  setField: (key: string, value: IFormFieldValue) => void;
+  setField: (key: string, value: IFormField) => void;
   submitted: boolean;
 }
 
-export interface IFormFieldValue extends IValidationParameters {}
+export interface IFormField extends IValidationArgs {}
 
-export interface IFormFieldValuesObject {
-  [key: string]: IFormFieldValue;
+export interface IFormFieldsObject {
+  [key: string]: IFormField;
 }
 
-export interface IFormProps {
+// @TODO Add prop to disable globalClassNames per field?
+export interface IFormProps extends IWithClassName {
   children?: React.ReactNode;
   onSubmit: ((values: any) => void | Promise<void>);
+  onValueChange?: ((values: any) => void | Promise<void>);
 }
 
 export interface IGlobalClassNames extends IFieldClassNames {
   formClassName?: string;
+  checkboxFieldClassName?: string;
+  selectFieldClassName?: string;
+  textareaFieldClassName?: string;
+  textFieldClassName?: string;
+  [key: string]: string | undefined;
 }
 
 export interface IRadioFieldProps extends IFieldWithOptionsProps {}
@@ -83,13 +94,25 @@ export interface ITextFieldProps extends IFieldProps {
   type?: string;
 }
 
-export interface IValidationParameters extends IValidationProps, IWithValue {}
+export interface IValidationArgs extends IValidationProps, IWithValue {}
 
 export interface IValidationProps {
-  validationRules?: Array<(value: any) => string | null | undefined | Promise<string | null | undefined>>;
+  validationRules?: ValidationRule[];
   validationSchema?: Schema<any>;
+}
+
+export interface IValidationRuleArgs extends IWithFields, IWithValue {}
+
+export interface IWithClassName {
+  className?: string;
+}
+
+export interface IWithFields {
+  fields: IFormFieldsObject;
 }
 
 export interface IWithValue {
   value: any;
 }
+
+export type ValidationRule = (args: IValidationRuleArgs) => string | null | undefined | Promise<string | null | undefined>;
