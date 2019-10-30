@@ -46,9 +46,10 @@ const App = () => {
     <Form<IMyFormValues>
       onSubmit={values => console.log('Submitted', values)}
       onValueChange={values => console.log('Value changed', values)}
+      onlyEmitDirtyValues
     >
       <Text
-        defaultValue="Jake"
+        defaultValue="John"
         label="First name"
         name="firstName"
         placeholder="Please enter your first name..."

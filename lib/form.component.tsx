@@ -4,7 +4,15 @@ import { IFormField, IFormFieldsObject, IFormProps } from './form.declarations';
 import { cx, throttle, validate } from './form.utils';
 import { formius } from './formius.class';
 
-export function Form<T>({ className, children, onSubmit, onValueChange }: IFormProps<T>): JSX.Element {
+// @TODO Do some kinda method overloading so that when onlyEmitDirtyValues is passed,
+// onSubmit and onvalueChange returns Partial<T>
+export function Form<T>({
+  className,
+  children,
+  onlyEmitDirtyValues,
+  onSubmit,
+  onValueChange,
+}: IFormProps<T>): JSX.Element {
   const [submissionCount, setSubmissionCount] = React.useState<number>(0);
   const fields = React.useRef<IFormFieldsObject>({});
 
@@ -44,10 +52,15 @@ export function Form<T>({ className, children, onSubmit, onValueChange }: IFormP
 
   const values = (): T => Object
     .keys(fields.current)
-    .reduce((object, key) => ({
-      ...object,
-      [key]: fields.current[key].value,
-    }), {}) as T;
+    .reduce((object, key) => {
+      const { defaultValue, value } = fields.current[key];
+      return {
+        ...object,
+        ...((!onlyEmitDirtyValues || (onlyEmitDirtyValues && value !== defaultValue)) && {
+          [key]: value,
+        }),
+      };
+    }, {}) as T;
 
   return (
     <form

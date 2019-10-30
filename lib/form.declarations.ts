@@ -25,7 +25,6 @@ export interface IField extends IWithValue {
   setTouched: React.Dispatch<React.SetStateAction<boolean>>;
   setValue: React.Dispatch<any>;
   touched: boolean;
-  value: any;
 }
 
 export interface IFieldClassNames {
@@ -45,8 +44,7 @@ export interface IFieldOption extends IWithValue {
   label: number | string;
 }
 
-export interface IFieldProps extends IFieldClassNames, IValidationProps {
-  defaultValue?: any;
+export interface IFieldProps extends IFieldClassNames, IValidationProps, Partial<IWithDefaultValue> {
   label?: string;
   name: string;
 }
@@ -61,7 +59,7 @@ export interface IFormContext {
   submitted: boolean;
 }
 
-export interface IFormField extends IValidationArgs {}
+export interface IFormField extends IValidationArgs, IWithDefaultValue {}
 
 export interface IFormFieldsObject {
   [key: string]: IFormField;
@@ -70,6 +68,7 @@ export interface IFormFieldsObject {
 // @TODO Add prop to disable globalClassNames per field?
 export interface IFormProps<T> extends IWithClassName {
   children?: React.ReactNode;
+  onlyEmitDirtyValues?: boolean;
   onSubmit: (values: T) => void | Promise<void>;
   onValueChange?: (values: T) => void | Promise<void>;
 }
@@ -107,6 +106,10 @@ export interface IValidationRuleArgs extends IWithFields, IWithValue {}
 
 export interface IWithClassName {
   className?: string;
+}
+
+export interface IWithDefaultValue {
+  defaultValue: any;
 }
 
 export interface IWithFields {

@@ -3,15 +3,19 @@ import { FormContext } from './form.context';
 import { IField, IFieldProps, IValidationArgs } from './form.declarations';
 import { validate } from './form.utils';
 
-export const useField = (props: IFieldProps): IField => {
+export const useField = ({
+  defaultValue,
+  name,
+  validationRules,
+  validationSchema,
+}: IFieldProps): IField => {
   const [errors, setErrors] = React.useState<string[]>([]);
   const [hasFocus, setHasFocus] = React.useState<boolean>(false);
   const [touched, setTouched] = React.useState<boolean>(false);
-  const [value, setValue] = React.useState(props.defaultValue || '');
+  const [value, setValue] = React.useState(defaultValue);
 
   const context = React.useContext(FormContext);
 
-  const { name, validationRules, validationSchema } = props;
   const validationArgs: IValidationArgs = {
     validationRules,
     validationSchema,
@@ -27,7 +31,10 @@ export const useField = (props: IFieldProps): IField => {
   };
 
   React.useEffect(() => {
-    context.setField(name, validationArgs);
+    context.setField(name, {
+      ...validationArgs,
+      defaultValue,
+    });
   }, [value]);
 
   React.useEffect(() => {

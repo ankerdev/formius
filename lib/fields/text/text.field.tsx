@@ -4,7 +4,10 @@ import { ITextFieldProps } from '../../form.declarations';
 import { useField } from '../../use-field.hook';
 
 export const Text = (props: ITextFieldProps) => {
-  const field = useField(props);
+  const field = useField({
+    ...props,
+    defaultValue: props.defaultValue || '',
+  });
 
   return (
     <FieldContainer field={field} props={props}>
